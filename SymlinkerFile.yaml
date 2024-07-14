@@ -1,0 +1,6 @@
+version: "0.1.0"
+links:
+  - name: "starship"
+    source: "./starship/starship.toml"
+    target: "~/.config/starship.toml"
+    force: true
