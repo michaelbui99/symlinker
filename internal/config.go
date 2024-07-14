@@ -4,21 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
 
 type SymlinkerFile struct {
-	Version string              `yaml:"version"`
-	Links   []SymlinkerFileLink `yaml:"links"`
-}
-
-type SymlinkerFileLink struct {
-	Name   string `yaml:"name"`
-	Source string `yaml:"source"`
-	Target string `yaml:"target"`
-	Type   string `yaml:"type"`
-	Force  bool   `yaml:"force"`
+	Version string `yaml:"version"`
+	Links   []Link `yaml:"links"`
 }
 
 func ParseSymlinkerFile(symlinkerFilePath string) (SymlinkerFile, error) {
@@ -36,6 +29,12 @@ func ParseSymlinkerFile(symlinkerFilePath string) (SymlinkerFile, error) {
 	err = yaml.Unmarshal(bytes, &symlinkerFile)
 	if err != nil {
 		return SymlinkerFile{}, fmt.Errorf("failed to deserialize SymlinkerFile, %w", err)
+	}
+
+	for _, link := range symlinkerFile.Links {
+		if len(strings.TrimSpace(link.Type)) == 0 {
+			link.Type = defaultLinkType
+		}
 	}
 
 	return symlinkerFile, nil
