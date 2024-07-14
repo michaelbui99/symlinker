@@ -4,8 +4,9 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/michaelbui99/symlinker/internal"
 	"github.com/spf13/cobra"
 )
 
@@ -14,8 +15,13 @@ var planCmd = &cobra.Command{
 	Use:   "plan",
 	Short: "Shows the changes Symlinker will perfrom on 'symlinker up'",
 	Long:  `Shows the changes Symlinker will perform on 'symlinker up'`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("plan called")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		f, err := internal.ParseSymlinkerFile("./SymlinkerFile.yaml")
+		if err != nil {
+			return err
+		}
+		log.Printf("%v\n", f)
+		return nil
 	},
 }
 
