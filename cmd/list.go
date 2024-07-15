@@ -16,7 +16,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Lists all links defined in SymlinkerFile",
-	Long:  `Lists all links defined in SymlinkerFile`,
+	Long:  `Lists all links defined in SymlinkerFile. Symlinker does not keep track of state, so they symlinks may or may not already exist.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -38,6 +38,7 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
+		// TODO: Add support for "MODULE" link type.
 		b := color.New(color.FgBlue, color.Bold)
 		r := color.New(color.FgRed, color.Bold)
 		for _, link := range symlinkerFile.Links {
