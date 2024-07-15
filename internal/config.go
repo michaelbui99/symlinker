@@ -14,6 +14,14 @@ type SymlinkerFile struct {
 	Links   []Link `yaml:"links"`
 }
 
+type SymlinkerFileNotFoundError struct {
+	files []string
+}
+
+func (e *SymlinkerFileNotFoundError) Error() string {
+	return fmt.Sprintf("no SymlinkerFile found amongst %v", e.files)
+}
+
 func ParseSymlinkerFile(symlinkerFilePath string) (SymlinkerFile, error) {
 	resolvedPath, err := filepath.Abs(symlinkerFilePath)
 	if err != nil {
@@ -38,4 +46,33 @@ func ParseSymlinkerFile(symlinkerFilePath string) (SymlinkerFile, error) {
 	}
 
 	return symlinkerFile, nil
+}
+
+// Returns any supported variant of "SymlinkerFile.yaml" name
+func FindSymlinkerFile(files []string) (string, error) {
+	supportedNames := map[string]bool{
+		"SymlinkerFile.yaml":  true,
+		"symlinkerFile.yaml":  true,
+		"symlinkerfile.yaml":  true,
+		"SYMLINKERFILE.yaml":  true,
+		"SYMLINKER_FILE.yaml": true,
+	}
+
+	for _, f := range files {
+		valid, ok := supportedNames[f]
+		if !ok {
+			continue
+		}
+
+		// Should not be possible since we use the map as a set where all entries are valid.
+		if !valid {
+			continue
+		}
+
+		return f, nil
+	}
+
+	return "", &SymlinkerFileNotFoundError{
+		files: files,
+	}
 }

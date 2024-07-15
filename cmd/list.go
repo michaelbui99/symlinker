@@ -1,27 +1,52 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/fatih/color"
+	"github.com/michaelbui99/symlinker/internal"
 	"github.com/spf13/cobra"
 )
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Lists all links defined in SymlinkerFile",
+	Long:  `Lists all links defined in SymlinkerFile`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		files, err := internal.ListFiles(cwd)
+		if err != nil {
+			return err
+		}
+
+		symlinkerFileName, err := internal.FindSymlinkerFile(files)
+		if err != nil {
+			return err
+		}
+
+		symlinkerFile, err := internal.ParseSymlinkerFile(fmt.Sprintf("./%s", symlinkerFileName))
+		if err != nil {
+			return err
+		}
+
+		b := color.New(color.FgBlue, color.Bold)
+		r := color.New(color.FgRed, color.Bold)
+		for _, link := range symlinkerFile.Links {
+			r.Printf("%s: ", link.Name)
+			b.Printf("\"%s\"", link.Source)
+			fmt.Printf(" --> ")
+			b.Printf("\"%s\"\n", link.Target)
+		}
+		return nil
 	},
 }
 
